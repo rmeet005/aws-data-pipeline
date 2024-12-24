@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/rmeet005/aws-data-pipeline.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("s3-rds-image")
+                }
+            }
+        }
+        stage('Push to ECR') {
+            steps {
+                script {
+                    def ecrUri = "686255964404.dkr.ecr.ap-south-1.amazonaws.com/s3-rds-image:latest"
+                    sh """
+                    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ecrUri
+                    docker tag s3-rds-image:latest $ecrUri:latest
+                    docker push $ecrUri:latest
+                    """
+                }
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+    }
+}
