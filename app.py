@@ -1,5 +1,5 @@
 import boto3
-import pymysql
+import mysql.connector
 from botocore.exceptions import NoCredentialsError
 
 def read_data_from_s3(bucket_name, file_key):
@@ -16,7 +16,7 @@ def read_data_from_s3(bucket_name, file_key):
 
 def push_data_to_rds(data, rds_endpoint, username, password, database):
     try:
-        connection = pymysql.connect(
+        connection = mysql.connector.connect(
             host="mydb1.cvsyuyy0kztf.ap-south-1.rds.amazonaws.com",
             user="admin",
             password="admin12345",
